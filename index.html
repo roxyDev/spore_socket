@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compartir Ubicación</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Compartir Ubicación</h1>
+    <button id="share-location">Compartir Ubicación</button>
+    <div id="coordinates"></div>
+
+    <script>
+        // Generar un nuevo UUID
+        const deviceId = uuid.v4();
+        const socket = io(); // Asegúrate de incluir Socket.IO en tu servidor
+
+        document.getElementById('share-location').onclick = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+
+                    const locationData = {
+                        deviceId: deviceId,
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        date: new Date (position.timestamp)
+                    };
+
+                    console.log(locationData);
+
+                    socket.emit('location', locationData);
+                    document.getElementById('coordinates').innerText =
+                        `Latitud: ${locationData.latitude}, Longitud: ${locationData.longitude}`;
+                }, (error) => {
+                    console.error('Error al obtener ubicación:', error);
+                });
+            } else {
+                alert('Geolocalización no soportada en este navegador.');
+            }
+        };
+    </script>
+</body>
+</html>
